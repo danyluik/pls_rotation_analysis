@@ -1,5 +1,6 @@
 import math
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import numpy as np
 import os
 import pandas as pd
@@ -38,7 +39,6 @@ def plot_significance(df, x, xlabel, ylabel, out_dir, zval=False):
     if not zval:
         ax.set_ylim(-0.1, 1.1)
 
-    # Make boundaries thicker
     for axis in ['top', 'bottom', 'left', 'right']:
         ax.spines[axis].set_color('black')
 
@@ -82,7 +82,6 @@ def plot_values(df, x, color, xlabel, ylabel, descr, out_dir):
         ax.set_xticks(np.arange(1,xvars+1,2))
         ax.set_xticklabels(np.arange(1,xvars+1,2))
 
-    # Make boundaries thicker
     for axis in ['top', 'bottom', 'left', 'right']:
         ax.spines[axis].set_color('black')
 
@@ -112,11 +111,11 @@ def plot_passed(df, x, xlabel, out_dir):
 
     ax.set_xlabel(xlabel, fontweight='bold', fontsize=14, labelpad=6)
     ax.set_ylabel('Average LVs passed', fontweight='bold', fontsize=14, labelpad=6)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     ax.grid(True, axis='both', alpha=0.3)
     plt.xticks(rotation=45)
     
-    # Make boundaries thicker
     for axis in ['top', 'bottom', 'left', 'right']:
         ax.spines[axis].set_color('black')
 
@@ -158,7 +157,6 @@ def plot_pvals(pvals, out_dir):
 
     ax.grid(True, axis='both', alpha=0.3)
 
-    # Make boundaries thicker
     for axis in ['top', 'bottom', 'left', 'right']:
         ax.spines[axis].set_color('black')
 
@@ -195,7 +193,6 @@ def line_plot(x, y, color, ylabel, descr, out_dir):
         ax.set_xticks(np.arange(1,xvars+1,2))
         ax.set_xticklabels(np.arange(1,xvars+1,2))
 
-    # Make boundaries thicker
     for axis in ['top', 'bottom', 'left', 'right']:
         ax.spines[axis].set_color('black')
 
@@ -220,11 +217,8 @@ def plot_singvals(df, singval, lv_id, out_dir):
     cmap = sns.color_palette('husl', 8)
     palette = {'none':cmap[5], 'behav':cmap[3], 'brain':cmap[1], 'both':cmap[0]}
     sns.histplot(df, palette=palette, alpha=0.8)
-
-    # Plot actual singular value from analysis (the same in every rotation type, so just get the first for this LV)
     plt.axvline(x=singval, color='r', linewidth=2.5)
 
-    # Some details, then save figure
     ax.set_xlabel('Singular value', fontweight='bold', fontsize=14)
     ax.set_ylabel('Count', fontweight='bold', fontsize=14)
     ax.yaxis.get_major_locator().set_params(integer=True)
@@ -235,7 +229,6 @@ def plot_singvals(df, singval, lv_id, out_dir):
 
     ax.grid(True, axis='both', alpha=0.3)
 
-    # Make boundaries thicker
     for axis in ['top', 'bottom', 'left', 'right']:
         ax.spines[axis].set_color('black')
 
@@ -309,7 +302,6 @@ def plot_behav_loadings(y, y_ci, behav_vars, lv_index, out_dir):
 
     ax.grid(True, axis='both', alpha=0.3, linewidth=2)
 
-    # Make boundaries thicker
     for axis in ['top', 'bottom', 'left', 'right']:
         ax.spines[axis].set_color('black')
         ax.spines[axis].set_linewidth(1.2)

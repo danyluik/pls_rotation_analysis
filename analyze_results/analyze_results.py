@@ -117,7 +117,7 @@ for lv in range(lvs):
     # For each LV, get an LV-specific output directory
     lv_id = str(lv+1)
     lv_id = lv_id.zfill(len(str(lvs)))
-    out_dir = f'{figure_dir}/lv_{lv_id}'
+    out_dir = f'{figure_dir}/lvs/lv_{lv_id}'
     os.makedirs(out_dir, exist_ok=True)
 
     # Make a dicionary of passrates by rotate method for this LV
