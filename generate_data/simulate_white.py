@@ -1,0 +1,99 @@
+import numpy as np
+import os
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import sys
+
+np.random.seed(10101010)
+
+
+"""
+Usage: python simulate_white.py /path/to/outputs
+
+Generates random and whitened datasets (100 datasets at each of 10 sample sizes).
+Each pair of X and Y matrices is saved under the working directory, in white/data/step_X/draw_Y
+
+"""
+
+
+# ---------- SETUP ---------- #
+
+working_dir = sys.argv[1]
+
+steps = 10 # Number of different sample sizes
+draws = 100 # Number of draws per step
+
+n = np.logspace(np.log10(100), np.log10(10000), num=steps) # sample size
+n = np.round(n, decimals=0).astype(int) # make all n integers
+
+p_x = 90 # x features
+p_y = 10 # y features
+
+working_dir = f'{working_dir}/white'
+os.makedirs(working_dir, exist_ok=True)
+
+np.savetxt(f'{working_dir}/n.csv', n, delimiter=',')
+
+description = 'Vary N, 10 values log spaced between 100 and 10 000. 100 draws of each. \n \
+               90 X, 10 Y, of randomly generated, whitened data.' 
+
+out_file = open(f'{working_dir}/run_description.txt', 'w')
+out_file.write(f'{description} \n')
+out_file.close()
+
+
+
+
+# ---------- SIMULATE DATA ---------- #
+
+def whiten(A):
+    # Scale matrix so each column has mean 0 and variance 1
+    scaler = StandardScaler()
+    A_scaled = scaler.fit_transform(A)
+
+    # Run PCA, whiten output
+    pca = PCA(n_components=min(A.shape[0], A.shape[1]), whiten=True)
+    A_white = pca.fit_transform(A_scaled)
+
+    return A_white
+
+
+
+for step in range(steps):
+    # Get ID for this step, filled with 0s so sorted properly
+    step_id = str(step+1)
+    step_id = step_id.zfill(len(str(steps)))
+    print(step_id)
+
+    current_n = n[step]
+
+
+    # Save model parameters for reference
+    model_params = {'n': current_n,
+                    'p_x': p_x,
+                    'p_y': p_y}
+
+    model_params = pd.Series(model_params)
+    step_dir = f'{working_dir}/step_{step_id}'
+    os.makedirs(step_dir, exist_ok=True)
+    model_params.to_csv(f'{step_dir}/model_params.csv', header=False)
+
+
+    # For each iteration, generate a PLS covariance matrix and a corresponding dataset with n subjects
+    for draw in range(draws):
+        draw_id = str(draw+1)
+        draw_id = draw_id.zfill(len(str(draws)))
+        
+        # Generate random X and Y, whiten using function above
+        X = np.random.randn(current_n, p_x)
+        Y = np.random.randn(current_n, p_y)
+        X_white = whiten(X)
+        Y_white = whiten(Y)
+
+        # Save in run- and dataset-specific output directory
+        draw_dir = f'{step_dir}/draw_{draw_id}'
+        os.makedirs(draw_dir, exist_ok=True)
+
+        np.savetxt(f'{draw_dir}/X_{step_id}_{draw_id}.csv', X_white, delimiter=',')
+        np.savetxt(f'{draw_dir}/Y_{step_id}_{draw_id}.csv', Y_white, delimiter=',')
