@@ -9,10 +9,12 @@ All simulated data were generated using the [GEMMR](https://github.com/murraylab
 ## Usage
 
 1. Environment setup
+
 The packages required and installation instructions can be found in ``requirements.txt`.
 
 
 2. Simulating data
+
 In ``generate_data``, any of the ``simulate_X.py`` files can be run with:
 
 ```
@@ -23,7 +25,8 @@ The output directory will contain 1000 simulated X and Y matrices, each in a sep
 
 
 3. Running PLS
-In ``pyls``, ``run_pls_simulated.py``` can be run with:
+
+In ``pyls``, ``run_pls_simulated.py`` can be run with:
 
 ```
 python run_pls_simulated.py /path/to/single/dataset
@@ -36,7 +39,7 @@ To speed up processing, a list of jobs can be created and submitted to a high-pe
 
 4. Analyzing results
 
-From the ``analyze_results`` folder, a set of PLS results across the 1000 can be organized into single ``.pkl`` files using:
+From the ``analyze_results`` folder, a set of PLS results across 1000 datasets can be organized into single ``.pkl`` files using:
 
 ```
 python organize_data.py /path/to/simulated/data
