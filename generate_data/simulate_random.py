@@ -1,18 +1,17 @@
 import numpy as np
 import os
 import pandas as pd
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
 import sys
 
-np.random.seed(10101010)
+np.random.seed(99999)
 
 
 """
-Usage: python simulate_white.py /path/to/outputs
+Usage: python simulate_random.py /path/to/outputs
 
-Generates random and whitened datasets (100 datasets at each of 10 sample sizes).
-Each pair of X and Y matrices is saved under the working directory, in white/data/step_X/draw_Y
+Generates datasets of values randomly drawn from a normal distribution with mean 0 and variance 1
+(100 datasets at each of 10 sample sizes). Each pair of X and Y matrices is saved under the working 
+directory, in random/data/step_X/draw_Y
 
 """
 
@@ -30,12 +29,12 @@ n = np.round(n, decimals=0).astype(int) # make all n integers
 p_x = 90 # x features
 p_y = 10 # y features
 
-working_dir = f'{working_dir}/white'
+working_dir = f'{working_dir}/random'
 os.makedirs(working_dir, exist_ok=True)
 
 np.savetxt(f'{working_dir}/n.csv', n, delimiter=',')
 
-description = 'Vary N, 10 values log spaced between 100 and 10 000. 100 draws of each. \n \
+description = 'Vary N, 10 values log spaced between 10 and 10 000. 100 draws of each. \n \
                90 X, 10 Y, of randomly generated, whitened data.' 
 
 out_file = open(f'{working_dir}/run_description.txt', 'w')
@@ -46,25 +45,6 @@ out_file.close()
 
 
 # ---------- SIMULATE DATA ---------- #
-
-def whiten(A):
-    # Scale matrix so each column has mean 0 and variance 1
-    scaler = StandardScaler()
-    A_scaled = scaler.fit_transform(A)
-
-    # Run PCA, whiten output
-    pca = PCA(n_components=min(A.shape[0], A.shape[1]), whiten=True)
-    A_white = pca.fit_transform(A_scaled)
-
-    return A_white
-
-
-# To assess efficacy of whitening procedure - covariance matrices should equal identity
-X_error = np.zeros((steps, draws))
-Y_error = np.zeros((steps, draws))
-Ix = np.eye(p_x)
-Iy = np.eye(p_y)
-
 
 for step in range(steps):
     # Get ID for this step, filled with 0s so sorted properly
@@ -91,11 +71,9 @@ for step in range(steps):
         draw_id = str(draw+1)
         draw_id = draw_id.zfill(len(str(draws)))
         
-        # Generate random X and Y, whiten using function above
+        # Generate random X and Y
         X = np.random.randn(current_n, p_x)
         Y = np.random.randn(current_n, p_y)
-        X_white = whiten(X)
-        Y_white = whiten(Y)
 
         # Save in run- and dataset-specific output directory
         draw_dir = f'{step_dir}/draw_{draw_id}'
@@ -103,15 +81,3 @@ for step in range(steps):
 
         np.savetxt(f'{draw_dir}/X_{step_id}_{draw_id}.csv', X_white, delimiter=',')
         np.savetxt(f'{draw_dir}/Y_{step_id}_{draw_id}.csv', Y_white, delimiter=',')
-
-        # Quantify difference between covariance matrix and identity
-        Rxx = np.corrcoef(X_white, rowvar=False)
-        Ryy = np.corrcoef(Y_white, rowvar=False)
-        X_error[step, draw] = np.linalg.norm(np.subtract(Rxx, Ix))
-        Y_error[step, draw] = np.linalg.norm(np.subtract(Ryy, Iy))
-
-# Save error
-error_dir = f'{working_dir}/error'
-os.makedirs(error_dir, exist_ok=True)
-np.savetxt(f'{error_dir}/X_error.csv', X_error, delimiter=',')
-np.savetxt(f'{error_dir}/Y_error.csv', Y_error, delimiter=',')

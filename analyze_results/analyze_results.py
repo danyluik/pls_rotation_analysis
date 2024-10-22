@@ -30,7 +30,9 @@ if 'canonical_corr' in working_dir:
     plot_label = 'Canonical corr.'
 elif 'noise' in working_dir:
     plot_label = 'Noise std. dev.'
-elif ('sample_size' in working_dir) or ('white' in working_dir) or ('ukbb' in working_dir):
+elif 'features' in working_dir:
+    plot_label = 'Y features'
+elif ('sample_size' in working_dir) or ('white' in working_dir) or ('random' in working_dir) or ('ukbb' in working_dir):
     plot_label = 'Sample size'
 
 rotate_methods = ['none', 'behav', 'brain', 'both']
@@ -38,6 +40,7 @@ rotate_methods = ['none', 'behav', 'brain', 'both']
 # Colors for strip plots
 corr_color = sns.color_palette('husl', 8)[4]
 var_color = sns.color_palette('husl', 8)[6]
+err_color = sns.color_palette('husl', 8)[7]
 
 sns.set_context('paper', font_scale=1.3)
 sns.set_style('whitegrid', {'grid.linestyle':'--', 'grid.color':'grey'})
@@ -157,3 +160,16 @@ for lv in range(lvs):
     lv_varexp = varexp['none'][:,:,lv]
     lv_varexp = pd.DataFrame(data=lv_varexp.T, columns=vals)
     plot_values(df=lv_varexp, x=vals, color=var_color, xlabel=plot_label, ylabel='Cov. explained', descr='covexp', out_dir=out_dir)
+
+
+# Plot errors for whitening procedure
+if 'white' in working_dir:
+    X_error = np.genfromtxt(f'{working_dir}/error/X_error.csv', delimiter=',')
+    Y_error = np.genfromtxt(f'{working_dir}/error/Y_error.csv', delimiter=',')
+
+    # Function expects shape (repeats, datasets), with dataset indices as columns
+    X_error = pd.DataFrame(data=X_error.T, columns=vals)
+    Y_error = pd.DataFrame(data=Y_error.T, columns=vals)
+
+    plot_values(df=X_error, x=vals, color=err_color, xlabel=plot_label, ylabel='Error', descr='x_error', out_dir=out_dir)
+    plot_values(df=Y_error, x=vals, color=err_color, xlabel=plot_label, ylabel='Error', descr='y_error', out_dir=out_dir)
